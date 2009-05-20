@@ -1,0 +1,4 @@
+License: GNU General Public License v2
+The full license can be found at http://opensource.org/licenses/gpl-license.php
+
+Janrain php library distributed under LGPL.  http://www.gnu.org/licenses/lgpl.html

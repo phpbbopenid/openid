@@ -1,0 +1,215 @@
+##############################################################
+## MOD Title: Simple OpenID
+## MOD Author: melvster < melvster at phpbbopenid dot com > http://www.phpbbopenid.com/
+## MOD Description: Adds OpenID login to phpbb forum
+## MOD Version: 0.2.4
+## 
+## Installation Level: Easy
+## Installation Time: 8 minutes
+##
+## Files To Edit: 4
+## styles/prosilver/template/index_body.html
+## styles/prosilver/theme/colours.css
+## styles/prosilver/template/login_body.html
+## styles/prosilver/template/ucp_register.html
+##
+## Included Files: 50
+## root/try_auth.php
+## root/finish_auth.php
+## root/new_openid_user.php
+## root/includes/openid/common.php
+## root/includes/openid/COPYING
+## root/includes/openid/README
+## root/includes/openid/openid2username.php
+## root/includes/openid/Auth/OpenID.php
+## root/includes/openid/Auth/Yadis/XML.php
+## root/includes/openid/Auth/Yadis/XRDS.php
+## root/includes/openid/Auth/Yadis/HTTPFetcher.php
+## root/includes/openid/Auth/Yadis/Yadis.php
+## root/includes/openid/Auth/Yadis/Manager.php
+## root/includes/openid/Auth/Yadis/ParseHTML.php
+## root/includes/openid/Auth/Yadis/XRIRes.php
+## root/includes/openid/Auth/Yadis/Misc.php
+## root/includes/openid/Auth/Yadis/ParanoidHTTPFetcher.php
+## root/includes/openid/Auth/Yadis/PlainHTTPFetcher.php
+## root/includes/openid/Auth/Yadis/XRI.php
+## root/includes/openid/Auth/OpenID/Consumer.php
+## root/includes/openid/Auth/OpenID/AX.php
+## root/includes/openid/Auth/OpenID/Parse.php
+## root/includes/openid/Auth/OpenID/PostgreSQLStore.php
+## root/includes/openid/Auth/OpenID/Interface.php
+## root/includes/openid/Auth/OpenID/SQLiteStore.php
+## root/includes/openid/Auth/OpenID/DatabaseConnection.php
+## root/includes/openid/Auth/OpenID/SReg.php
+## root/includes/openid/Auth/OpenID/ServerRequest.php
+## root/includes/openid/Auth/OpenID/HMACSHA1.php
+## root/includes/openid/Auth/OpenID/BigMath.php
+## root/includes/openid/Auth/OpenID/Association.php
+## root/includes/openid/Auth/OpenID/Nonce.php
+## root/includes/openid/Auth/OpenID/URINorm.php
+## root/includes/openid/Auth/OpenID/Server.php
+## root/includes/openid/Auth/OpenID/Discover.php
+## root/includes/openid/Auth/OpenID/TrustRoot.php
+## root/includes/openid/Auth/OpenID/SQLStore.php
+## root/includes/openid/Auth/OpenID/Message.php
+## root/includes/openid/Auth/OpenID/MySQLStore.php
+## root/includes/openid/Auth/OpenID/DiffieHellman.php
+## root/includes/openid/Auth/OpenID/CryptUtil.php
+## root/includes/openid/Auth/OpenID/KVForm.php
+## root/includes/openid/Auth/OpenID/Extension.php
+## root/includes/openid/Auth/OpenID/DumbStore.php
+## root/includes/openid/Auth/OpenID/FileStore.php
+## root/includes/openid/Auth/OpenID/PAPE.php
+#
+## License: http://opensource.org/licenses/gpl-license.php GNU General Public License v2
+##############################################################
+## For security purposes, please check: http://www.phpbb.com/mods/
+## for the latest version of this MOD. Although MODs are checked
+## before being allowed in the MODs Database there is no guarantee
+## that there are no security problems within the MOD. No support
+## will be given for MODs not found within the MODs Database which
+## can be found at http://www.phpbb.com/mods/
+##############################################################
+## Author Notes: Based on PHP OpenID library by JanRain, Inc.
+## Author Notes: see also: damnian < damnian at phpbb dot cc > (Dmitry Shechtman) http://www.phpbb.cc/
+## 
+##############################################################
+## MOD History:
+## 
+## 10 Oct 2007: 0.1.0 - First release
+## 11 Oct 2007: 0.1.1 - Fixed login box style
+## 15 Oct 2007: 0.1.2 - Update for RC7, populate website
+## 15 Mar 2008: 0.1.3 - Candidate for Gold
+## 29 Mar 2008: 0.1.4 - DB bug fix, and some style suggestions added
+## 19 May 2008: 0.2.0 - OpenID2 added, nicknames added
+## 23 May 2008: 0.2.1 - bug fix and release
+## 26 Jul 2008: 0.2.2 - get email from sreg
+## 04 Dec 2008: 0.2.3 - cosmetic changes, stricter validation
+## 20 Jan 2009: 0.2.4 - fixed typo in new_openid_user
+## 
+##############################################################
+## Before Adding This MOD To Your Forum, You Should Back Up All Files Related To This MOD 
+##############################################################
+
+#
+#-----[ COPY ]------------------------------------------
+#
+copy root/*.* to .
+copy root/includes/openid/*.* to includes/openid/*.*
+copy root/includes/openid/Auth/*.* to includes/openid/Auth/*.*
+copy root/includes/openid/Auth/Yadis/*.* to includes/openid/Auth/Yadis/*.*
+copy root/includes/openid/Auth/OpenID/*.* to includes/openid/Auth/OpenID/*.*
+copy styles/prosilver/imageset/icon_openid.png to styles/prosilver/imageset/icon_openid.png
+copy styles/prosilver/template/new_openid_user.html to styles/prosilver/template/new_openid_user.html
+#
+#-----[ SQL ]------------------------------------------
+#
+ALTER TABLE phpbb_users ADD COLUMN user_openid VARCHAR(255) NOT NULL default '';
+#
+#-----[ OPEN ]------------------------------------------
+#
+styles/prosilver/theme/colours.css
+#
+#-----[ FIND ]------------------------------------------
+#
+	background-image: url("{T_THEME_PATH}/images/icon_textbox_search.gif");
+}
+#
+#-----[ AFTER, ADD ]------------------------------------------
+#
+/* OpenID input box, as described at www.openidenabled.com */
+input.openid_login {
+   background: url(styles/prosilver/imageset/icon_openid.png) no-repeat;
+   background-color: #fff;
+   background-position: 0 50%;
+   color: #000;
+   margin-left: 14px;
+   padding-left: 16px;
+}
+#
+#-----[ OPEN ]------------------------------------------
+#
+styles/prosilver/template/index_body.html
+#
+#-----[ FIND ]------------------------------------------
+#
+	</form>
+#
+#-----[ AFTER, ADD ]------------------------------------------
+#
+        <form method="get" action="try_auth.php">
+        	{S_FORM_TOKEN}
+        	<fieldset class="quick-login">
+        	<input type="hidden" name="action" value="verify" />
+        	<label for="openid_url"><a title="About OpenID" href="http://openid.net/what/">OpenID:</a></label>
+        	<input type="text" name="openid_url" id="openid" class="inputbox openid_login" size="10" class="inputbox" title="{L_USERNAME}" style="width:14%" />
+        	<input type="submit" name="login" value="GO" class="button2" />
+        	<a title="phpbbopenid support" href="http://phpbbopenid.com">(Support)</a>
+        	</fieldset>
+        </form>
+#
+#-----[ OPEN ]------------------------------------------
+#
+styles/prosilver/template/login_body.html
+#
+#-----[ FIND ]------------------------------------------
+#
+	</form>
+#
+#-----[ AFTER, ADD ]------------------------------------------
+#
+<div class="panel">
+   <div class="inner"><span class="corners-top"><span></span></span>
+
+   <div class="content">
+<h2>OpenID</h2>
+<fieldset class="fields1">
+              <form method="get" action="try_auth.php">
+           {S_FORM_TOKEN}
+           <fieldset class="quick-login">
+           <input type="hidden" name="action" value="verify" />
+           <label for="openid_url"><a title="About OpenID" href="http://openid.net/what/">OpenID:</a></label>
+           <input type="text" name="openid_url" id="openid" class="inputbox openid_login" size="10" class="inputbox" title="{L_USERNAME}" style="width:14%" />
+           <input type="submit" name="login" value="{L_SUBMIT}" class="button2" />
+                <a title="phpbbopenid support" href="http://phpbbopenid.com">(Support)</a>
+           </fieldset>
+        </form>
+      </fieldset>
+   </div>
+   <span class="corners-bottom"><span></span></span></div>
+</div>
+#-----[ OPEN ]------------------------------------------
+#
+styles/prosilver/template/ucp_register.html
+#
+#-----[ FIND ]------------------------------------------
+#
+	</form>
+#
+#-----[ AFTER, ADD ]------------------------------------------
+#
+<div class="panel">
+   <div class="inner"><span class="corners-top"><span></span></span>
+
+   <div class="content">
+<h2>OpenID</h2>
+<fieldset class="fields1">
+              <form method="get" action="try_auth.php">
+           {S_FORM_TOKEN}
+           <fieldset class="quick-login">
+           <input type="hidden" name="action" value="verify" />
+           <label for="openid_url"><a title="About OpenID" href="http://openid.net/what/">OpenID:</a></label>
+           <input type="text" name="openid_url" id="openid" class="inputbox openid_login" size="10" class="inputbox" title="{L_USERNAME}" style="width:14%" />
+           <input type="submit" name="login" value="{L_SUBMIT}" class="button2" />
+                <a title="phpbbopenid support" href="http://phpbbopenid.com">(Support)</a>
+           </fieldset>
+        </form>
+      </fieldset>
+   </div>
+   <span class="corners-bottom"><span></span></span></div>
+</div>
+#-----[ SAVE/CLOSE ALL FILES ]------------------------------------------
+#
+# EoM
+
+
